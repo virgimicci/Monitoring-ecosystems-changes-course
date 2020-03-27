@@ -30,6 +30,6 @@ pairs(meuse[,3:6]) #subset of meuse dataset since column 3 to 6, another way for
 # Exercise: prettify the graph
 pairs(meuse[,3:6],pch=8,col="purple",cex=2)
 
-#GGally package will prettify
+#GGally package will prettify the graph
 library(GGally)
 ggpairs(meuse[,3:6])
