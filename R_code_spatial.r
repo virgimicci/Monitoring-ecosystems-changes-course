@@ -52,5 +52,24 @@ library(ggplot2) # require(ggplot2)
 
  # save the .RData under the menu File
 
+# load the previously saved .RData
+setwd("C:/lab/")
 
+load("spatial.RData")
+ls()
 
+#covid
+install.packages("ggplot2")
+library(ggplot) #require(ggplot2)
+data(mpg)
+head(mpg)
+# key components: data, aes, geometry
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_point()
+
+# we can change the geometry of the graph 
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_line()
+ggplot(mpg, aes(x=displ, y=hwy)) + geom_polygon()
+
+head(covid)
+# aes= variable we want to plot, size=dimensions of point, geom = geometry of the point
+ggplot(covid, aes(x=lon, y=lat, size=cases)) + geom_point()
