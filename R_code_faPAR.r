@@ -45,5 +45,27 @@ model1 <- lm(faPAR10p~copNDVIp)
 plot(copNDVIp,faPAR10p,col="green")
 abline(model1,col="red")
 
+##### day 2
+
+setwd("C:/lab/")
+load("faPAR.RData")
+
+library(raster)
+library(rasterdiv)
+library(rasterVis)
+writeRaster(copNDVI, "copNDVI.tif")
+
+# faPAR: level plot this set
+
+
+
+
+
+
+
+
+
+
+
 
 
