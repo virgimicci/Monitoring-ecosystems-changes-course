@@ -39,7 +39,7 @@ rlist <- list.files(pattern="snow")
 # we use the function lapply to apply the raster function to all the list we've done before
 import <- lapply(rlist, raster)
 
-# when i have so many raster files is better to put them in a stack
+# when i have so many raster files is better to put them in a stack, without using par function
 snow.multitemp <- stack(import)  
 plot(snow.multitemp, col=cl)
 
@@ -54,3 +54,32 @@ plot(snow.multitemp$snow2020r, col=cl, zlim=c(0,250))
 
 
 #### Let's make a prediction
+
+source("prediction.r")
+plot(predicted.snow.2025.norm, col=cl)
+
+## Day 2
+setwd("C:/lab/snow") # windows
+
+# Excercise: import all of the snow cover images all together 
+library(raster)
+
+rlist <- list.files(pattern="snow")
+import <- lapply(rlist, raster)
+snow.multitemp <- stack(import)  
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+plot(snow.multitemp, col=cl)
+
+prediction <- raster("predicted.2025.norm.tif")
+plot(prediction, col=cl)
+# writeraster creates a data, it the opposite to raster function
+# with raster or brik function you import the data, with writeraster function you are exportinx images from R to my folder
+writeRaster(prediction, "final.tif")
+final.stack <- stack(snow.multitemp, prediction)
+final.stack <- stack(snow.multitemp, prediction)
+plot(final.stack, col=cl)
+
+# export R graph for yout beautiful thesis
+png("my_final_exciting_graph.png")
+plot(final.stack, col=cl)
+dev.off()
