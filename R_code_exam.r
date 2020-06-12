@@ -43,13 +43,13 @@ spplot(meuse, "zinc")
 # exercise: plot the aspatial amount of copper, with "main" i create the title of the graph
 spplot(meuse, "copper", main="copper concentration")
 
-# We changed the way we see the point in the graph 
+# We change the way we see the point in the graph with the function bubble
 bubble(meuse, "zinc")
 
 # Exercise: bubble copper in red
 bubble(meuse, "copper", main="Copper concentration", col="red")
 
-##importing new data
+## importing new data
 # download covid_agg.csv from iol and build a folder called lab into C:
 # put the covid_agg.csv file into the folder lab 
 
