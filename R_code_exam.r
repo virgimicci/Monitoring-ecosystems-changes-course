@@ -1,4 +1,26 @@
 # R code exam
+
+
+# Indices
+# 1. R_code_first (24)
+# 2. R_code_multipanel 
+# 3. R_code_spatial 
+# 4. R_code_multivariate 
+# 5. R_code_remote_sensing 
+# 6. densitymap_point_pattern_analysis 
+# 7.  R_code_ecosystem_functioning
+# 8.  R_code_PCA_remote_sensing 
+# 9.  R_code_faPAR  
+# 10. R_code_radiance 
+# 11. R_code_faPAR10
+# 12. R_code_EBVs 
+# 13. R_code_snow 
+# 14. R_code_no2
+# 15. R_crop_an_image 
+# 16. notes_for_project 
+# 17. R_code_temp_interpolation
+# 18. R_species_distribution_modelling 
+
 # 1. R code first
 install.packages("sp")
 
