@@ -1,4 +1,4 @@
-# R code exam
+# R_code_exam.r
 
 
 # Indices
@@ -21,30 +21,36 @@
 # 17. R_code_temp_interpolation
 # 18. R_species_distribution_modelling 
 
-# 1. R code first
+#### 1. R code first ####
+# the function install.packages is used to install any packages that we want to use which is still not intalled in our R
+#sp is a package for spatial data
 install.packages("sp")
 
+# the function library is used to start using the data present in the package
 library(sp)
+#meuse is a dataset comprising of four heavy metals measured in the top soil in a flood plain along the river Meuse
 data(meuse)
 
-# let's see how the meuse dataset is structured:
+# let's see how the meuse dataset is structured
 meuse
-
-# let's look at the first row of the set
+# let's look at the first rows of the set with the function head()
 head(meuse)
 
 #Let's plot two variables
 #let's see if zinc concentration is related to that copper
+#the function attach () connects the dataset to the r search path so that we can use the infos in the dataset
 attach(meuse)
+# plot function is used for plotting a dataset
 plot(zinc,copper)
+# col is used to choose the colour
 plot(zinc,copper,col="green")
+# pch is used to define the symbol
 plot(zinc,copper,col="green",pch=19)
+# cex is used to define the size of the symbol
 plot(zinc,copper,col="green",pch=19,cex=4)
 
-############################################################
-#####################################
-#############
-# 2. R spatial
+#### 2. R_code_multipanel ### 
+#### 3. R_code_spatial  ####
 
 # R code for spatial view of points
 
