@@ -1,6 +1,5 @@
 # R_code_exam.r
 
-
 # Indices
 # 1. R_code_first 
 # 2. R_code_multipanel 
@@ -12,14 +11,12 @@
 # 8. R_code_PCA_remote_sensing 
 # 9. R_code_faPAR  
 # 10. R_code_radiance 
-# 11. R_code_faPAR10
-# 12. R_code_EBVs 
-# 13. R_code_snow 
-# 14. R_code_no2
-# 15. R_crop_an_image 
-# 16. notes_for_project 
-# 17. R_code_temp_interpolation
-# 18. R_species_distribution_modelling 
+# 11. R_code_EBVs 
+# 12. R_code_snow 
+# 13. R_code_no2
+# 14. R_crop_an_image 
+# 15. R_code_temp_interpolation
+# 16. R_species_distribution_modelling
 
 ####### 1. R_code_first #######
 ###############################
@@ -408,9 +405,698 @@ dev.off()
 ####### 7. R_code_ecosystem_functioning #######
 ###############################################
 
+# R_code_ecosystem_functions.r
+# R code to view biomass over the world and calculate changes in ecosystem functions
+# energy
+# chemical cycling
+# proxies
+# install.packages("rasterdiv")
+# install.packages("rasterVis")
 
 
+install.packages("rasterdiv") # is useful to calculate indices of diversity on numerical matrices based on information theory
+install.packages("rasterVis") # is a package that implements visualization methods for rasters
+
+library(rasterVis)
+library(rasterdiv)
+# the input dataset is the Copernicus Long-term (1999-2017) average Normalise Difference Vegetation Index (copNDVI)
+data(copNDVI)
+plot(copNDVI)
+
+# reclassify is a function that (re)classifies groups of values to other values
+# "cbind" is to remove some data from the library that is not useful for us
+copNDVI<- reclassify(copNDVI, cbind(253:255,NA), right=TRUE)
+levelplot(copNDVI)
+# highlights the mean biomass over the last 20 years
+
+# fact=10 (factor of 10) is aggregating 10 pixels in 1, so the new image has much visible boundaries beetween colours
+# the number of pixel has to be select in relation to what we are trying to see, if it is possible to have less pixels with the same analysis results is better (the file will be smaller in size)
+copNDVI10<- aggregate (copNDVI,fact=10)
+levelplot(copNDVI10)
+
+#let's try 100x100 pixels in one
+copNDVI100<- aggregate (copNDVI,fact=100)
+levelplot(copNDVI100)
+
+##############################
+setwd("C:/lab/")
+library(raster)
+
+defor1 <- brick("defor1_.jpg.png") # imports different layers at a time 
+defor2 <- brick("defor2_.jpg.png")
+
+# band1: NIR
+# band2: red
+# band3: green 
+# making the plot of the two images separately, selecting the bands, stretch to make a better passage between colours
+plotRGB(defor1, r=1, g=2,b=3, stretch="Lin")
+plotRGB(defor2, r=1, g=2, b=3, stretch="Lin")
+
+# to see the two images one next to the other we use the par() function with multiframe by rows (1 line, 2 columns)
+par(mfrow=c(1,2))
+plotRGB(defor1, r=1, g=2, b=3, stretch="Lin") # Red-Green-Blue plot of a multi-layered Raster object
+plotRGB(defor2, r=1, g=2, b=3, stretch="Lin")
+
+# if you write defor1 on R you look at the names that correspond to the 3 bands
+# names: defor1_.1,  defor1_.2,  defor1_.3 
+# band1: NIR    defor1_.1
+# band2: red    defor1_.2
+# dvi=difference vegetation index 
+dvi1 <- defor1$defor1_.1 - defor1$defor1_.2
+# same for defor2
+# names:defor2_.1, defor2_.2, defor2_.3 
+# band1:NIR, defor2_.1
+# band2:red, defor2_.2
+ 
+dvi2 <- defor2$defor2_.1 - defor2$defor2_.2
+
+cl <- colorRampPalette(c('darkblue','yellow','red','black'))(100) #we create the palette with the colours that we think more useful to highlight our data
+par(mfrow=c(1,2))
+plot(dvi1, col=cl)
+plot(dvi2, col=cl)
+
+#let's see the difference in the dvi between the first one and the second one 
+difdvi <- dvi1 - dvi2
+dev.off()
+cld <- colorRampPalette(c('blue','white','red'))(100) 
+plot(difdvi, col=cld) 
+
+# to make an histogram 
+hist(difdvi) 
+
+####### 8. R_code_PCA_remote_sensing #######
+############################################
+
+#R_code_pca_remote_sensing.r
+
+setwd("C:/lab/") 
+library(raster)
+library(RStoolbox)
+
+p224r63_2011 <- brick("p224r63_2011_masked.grd")
+
+# we use plotRGB
+# b1 blue
+# b2 green
+# b3 red
+# b4 NIR
+# b5 SWIR (short wave infrared)
+# infrared has 3 parts: one close to red, one in other place, one as thermal infrared.
+# b6 thermal infrar
+# b7 SWIR
+# b8 panchromatic
+
+plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
+
+##The same plot with GGplot
+library(ggplot2)
+ggRGB(p224r63_2011,5,4,3) # ggRGB calculates RGB color composite raster for plotting with ggplot2
 
 
+# do the same with the 1988 image
+p224r63_1988 <- brick("p224r63_1988_masked.grd")
+plotRGB(p224r63_1988, r=5, g=4, b=3, stretch="Lin")
+
+par(mfrow=c(1,2))
+plotRGB(p224r63_1988, r=5, g=4, b=3, stretch="Lin")
+plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
+
+# let's see if the bands are correlated to eachother 
+# being correlated means that you are following the pattern of another variable, 
+# we are going to see if band3 is correlated to band1, so if having small values of B1 is related to the values on B3 
+# first we need to know the names of those bands 
+names(p224r63_2011)
+#"B1_sre" "B2_sre" "B3_sre" "B4_sre" "B5_sre" "B6_bt"  "B7_sre"
+#we are going, through $, to correlate the bands to the image
+plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
+
+dev.off()
+plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
+
+# PCA
+# decrease resolution
+p224r63_2011_res <- aggregate(p224r63_2011, fact=10)
+# rasterPCA function calculates R-mode PCA (Principal Component Analysis) for RasterBricks or RasterStacks and returns a RasterBrick with multiple layers of PCA scores
+# PCA is useful to uncover relationships among many variables (as found in a set of raster maps in a map list) and to reduce the amount of data needed to define the relationships
+p224r63_2011_pca <- rasterPCA(p224r63_2011_res)
+
+plot(p224r63_2011_pca$map)
+cl <- colorRampPalette(c('dark grey','grey','light grey'))(100) 
+plot(p224r63_2011_pca$map, col=cl)
+summary(p224r63_2011_pca$model)
+pairs(p224r63_1988)
+
+# let's do the same for the 1988 
+p224r63_1988_res <- aggregate(p224r63_1988, fact=10)
+p224r63_1988_pca <- rasterPCA(p224r63_1988_res)
+plot(p224r63_1988_pca$map, col=cl)
+summary(p224r63_1988_pca$model) # we see that there is high correlation 
+# here as well we can see that the PC1 has the highest amount of information
+summary(p224r63_1988_pca$model) # we see that there is high correlation 
+pairs(p224r63_1988)
+
+# now we can make a difference between the 1988 and 2011 and then plotting the difference. 
+# we are making the difference of every pixel
+difpca <- p224r63_2011_pca$map - p224r63_1988_pca$map
+plot(difpca)
+# since the PC1 contains most of the information so we can also only plot this one, only 1 layer
+cldif <- colorRampPalette(c('blue','black','yellow'))(100)
+plot(difpca$PC1, col=cldif)
+# we see the areas that have changed most
+
+###### 9. R_code_faPAR  #######
+###############################
+
+# R_code_faPAR.r
+# how to look at chemical cycling from satellite
+
+# faPAR code
+
+library(raster)
+library(rasterVis)
+library(rasterdiv)
+
+# copNDVI (copernicus NDVI) NDVI= works with layers of reflectance
+# plants: high reflectance in NIR and low in RED
+# no plants: lower NIR higher RED
+# let's have a look to the Copernicus image 
+plot(copNDVI)
+copNDVI <- reclassify(copNDVI, cbind(253:255, NA))
+levelplot(copNDVI)
+
+setwd("C:/lab/")
+faPAR10 <- raster("C:/lab/faPAR10.tif")
+
+# with faPAR we can see the real power of the forest of keeping the carbon
+levelplot(faPAR10)
+
+# for so the pdf 
+pdf("copNDVI.pdf")
+levelplot(copNDVI)
+dev.off()
+pdf("faPAR.pdf")
+levelplot(faPAR10)
+dev.off()
+
+##### day 2
+
+setwd("C:/lab/")
+load("faPAR.RData")
+
+library(raster)
+library(rasterdiv)
+library(rasterVis)
+writeRaster(copNDVI, "copNDVI.tif")
+# 5.3 MB
+
+# faPAR: level plot this set
+levelplot(faPAR10)
+
+##### Day 3
+### regression model between faPAR and NDVI
+## we have two variable (x,y), and we can see the relation between them
+# y= bx+a 
+# b= the slope, a= the point of intersection with y (intercept)
+
+erosion <- c(12, 14, 16, 24, 26, 40, 55, 67)
+hm <- c(30, 100, 150, 200, 260, 340, 460, 600)
+plot(erosion, hm, col="red", pch=19, xlab="erosion", ylab="heavy metals")
+
+ # the function used is lm
+model1 <- lm(hm ~ erosion)
+summary(model1) # to have all the information about the model
+# in this case the equation is hm= 9.2751*erosion + (-26.9888)
+#pvalue= how many time is a random situation, if p is lower than 0.01 means lower prob (1/100) that is random, so the variables are related
+abline(model1) # line described by a and b
+
+# let's do the same for the faPAR and NDVI 
+setwd("C:/lab/")
+faPAR10 <- raster("C:/lab/faPAR10.tif")
+library(raster)
+library(rasterdiv)
+faPAR10 <- raster("C:/lab/faPAR10.tif")
+plot(faPAR10)
+plot(copNDVI)
+# let's remove the water values from the copNDVI
+copNDVI <- reclassify(copNDVI, cbind(253:255, NA), right=TRUE)
+
+# function to make a random sample
+library(sf) # to call st_* functions
+random.points <- function(x,n)
+{
+lin <- rasterToContour(is.na(x))
+pol <- as(st_union(st_polygonize(st_as_sf(lin))), 'Spatial') # st_union to dissolve geometries
+pts <- spsample(pol[1,], n, type = 'random')
+}
+
+pts <-random.points(faPAR10,1000) 
+copNDVIp <- extract(copNDVI, pts)
+faPAR10p <- extract(faPAR10,pts)
+
+# photosyinthesis vs biomass
+model2 <- lm(faPAR10p ~ copNDVIp)
+summary(model2) # we see through the r squared and the p-value that the correlation is not random
+plot(copNDVIp, faPAR10p, col="green", xlab="biomass", ylab="photosynthesis")
+abline(model2, col="red")
+# there are some parts with high biomass and high faAPR(near red line)
+# but also points with high biomass but low photosyntesis, so they are far from red line
+
+####### 10. R_code_radiance #######
+###################################
+# R_code_radiance.r
+
+library(raster)
+
+#let's create a raster with 2 rows and 2 columns
+toy <- raster(ncol=2, nrow=2, xmn=1, xmx=2, ymn=1, ymx=2)
+values(toy) <- c(1.13,1.44,1.55,3.4)
+plot(toy)
+text(toy, digits=2)
+
+# we changed the original, the lower the n of bits we use, the lower the difference between pixels 
+toy2bits <- stretch(toy,minv=0,maxv=3)
+storage.mode(toy2bits[]) = "integer"
+plot(toy2bits)
+text(toy2bits, digits=2)
+
+# let's use 4 bits, 16 values possible
+toy4bits <- stretch(toy,minv=0,maxv=15)
+storage.mode(toy4bits[]) = "integer"
+plot(toy4bits)
+text(toy4bits, digits=2)
+
+# now 8 bits, 256 potential values 
+toy8bits <- stretch(toy,minv=0,maxv=255)
+storage.mode(toy8bits[]) = "integer"
+plot(toy8bits)
+text(toy8bits, digits=2)
+
+# plot all togheter
+par(mfrow=c(1,4))
+plot(toy)
+text(toy, digits=2)
+
+plot(toy2bits)
+text(toy2bits, digits=2)
+
+plot(toy4bits)
+text(toy4bits, digits=2)
+
+plot(toy8bits)
+text(toy8bits, digits=2)
+
+dev.off()
+library(rasterdiv)
+plot(copNDVI)
 
 
+########### 11. R_code_EBVs  ###########
+########################################
+
+# R_code_EBVs.r
+
+# install.packages("raster")
+# install.packages("RStoolbox")
+library(raster)
+library(RStoolbox) # this is for PCA
+
+setwd("C:/lab/") # windows
+
+# now we import the image: we can use raster which imports one single layer or brick which imports the whole image (different layers at a time)
+snt <- brick("snt_r10.tif")
+
+plot(snt)
+
+# B1 blue
+# B2 green
+# B3 red
+# B4 NIR
+
+# R3 G2 B1
+plotRGB(snt, 3, 2, 1, stretch="Lin") # image as the human eye would see it
+plotRGB(snt, 4, 3, 2, stretch="Lin") # NIR on top of red, vegetation is then colored red
+pairs(snt) # to produce a matrix of scatterplots 
+
+### PCA analysis
+sntpca <- rasterPCA(snt)
+sntpca
+
+summary(sntpca$model)
+# 70% of information
+plot(sntpca$map) 
+
+plotRGB(sntpca$map, 1, 2, 3, stretch="lin")
+
+# set the moving window
+# to see the different standard deviation in the groups of pixels 
+window <- matrix(1, nrow = 5, ncol = 5)
+window
+
+sd_snt <- focal(sntpca$map$PC1, w=window, fun=sd)
+
+cl <- colorRampPalette(c('dark blue','green','orange','red'))(100) # 
+plot(sd_snt, col=cl)
+
+par(mfrow=c(1,2))
+plotRGB(snt,4,3,2, stretch="lin", main="original image") 
+plot(sd_snt, col=cl, main="diversity")
+
+############## day 2
+
+## FOCAL ON Cladonia
+setwd("C:/lab/") 
+library(RStoolbox)
+library(raster) # two function we can use: 1.raster(import one single layer, one bend) 2.brick(import several layers)
+# now we have three layers so we need brick function
+clad <- brick("cladonia_stellaris_calaita.JPG")
+
+plotRGB(clad,1,2,3, stretch="lin") 
+# we create a window to analyze the standard deviation of a 3x3 matrix, and so 3x3 pixel
+# number one is an arbitrary value
+window <- matrix(1, nrow = 3, ncol = 3)
+window
+
+cladpca<-rasterPCA(clad)
+cladpca 
+plotRGB(cladpca$map, 1, 2, 3, stretch="lin")
+summary(cladpca$model)
+# functin focal for do the calculation of the value of neightboorod local cells
+# we want the first names which is PC1
+sd_clad <- focal(cladpca$map$PC1, w=window, fun=sd)
+clad
+# PC1_agg <- aggregate(cladpca$map$PC1, fact=10)
+# sd_clad_agg <- focal(PC1_agg, w=window, fun=sd)
+
+#plot the calculation
+#is telling us how much complex is the organism, with the violet and pink 
+
+par(mfrow=c(1,2))
+cl <- colorRampPalette(c('yellow','violet','black'))(100)
+plotRGB(clad, 1,2,3, stretch="lin")
+plot(sd_clad,col=cl) 
+# plot(sd_clad_agg,col=cl) 
+
+######## 12. R_code_snow ########
+#################################
+
+# R_code_snow.r
+
+setwd("C:/lab/") # windows
+
+# install.packages("ncdf4")
+library(ncdf4) # in order to read netCDF files, all copernicus data use this extension
+library(raster)
+
+snowmay <- raster("c_gls_SCE_202005260000_NHEMI_VIIRS_V1.0.1.nc")
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+
+# Exercise: plot snow cover with the cl palette
+plot(snowmay,col=cl)
+
+##### import snow data
+
+setwd("C:/lab/snow/")
+
+snow2000r <- raster("snow2000r.tif")
+snow2005r <- raster("snow2005r.tif")
+snow2010r <- raster("snow2010r.tif")
+snow2015r <- raster("snow2015r.tif")
+snow2020r <- raster("snow2020r.tif")
+
+par(mfrow=c(2,3))
+plot(snow2000r, col=cl)
+plot(snow2005r, col=cl)
+plot(snow2010r, col=cl)
+plot(snow2015r, col=cl)
+plot(snow2020r, col=cl)
+
+##### we can do the same we've done before with less command
+## fast version of import and plot many data for lazy people
+# is used to apply a function, in this case "raster" to several layer in one time 
+
+# list.files function is used to do the list of all the files in a cerain place considering a repeting pattern in the name of the files
+rlist <- list.files(pattern="snow")
+
+# we use the function lapply to apply the raster function to all the list we've done before
+import <- lapply(rlist, raster)
+
+# when i have so many raster files is better to put them in a stack, without using par function
+snow.multitemp <- stack(import)  
+plot(snow.multitemp, col=cl)
+
+# I can also chose which ones to plot
+par(mfrow=c(1,2))
+plot(snow.multitemp$snow2000r, col=cl)
+plot(snow.multitemp$snow2020r, col=cl)
+
+par(mfrow=c(1,2))
+plot(snow.multitemp$snow2000r, col=cl, zlim=c(0,250))
+plot(snow.multitemp$snow2020r, col=cl, zlim=c(0,250))
+
+
+#### Let's make a prediction
+
+source("prediction.r")
+plot(predicted.snow.2025.norm, col=cl)
+
+######### Day 2
+setwd("C:/lab/snow") # windows
+
+# Excercise: import all of the snow cover images all together 
+library(raster)
+
+rlist <- list.files(pattern="snow")
+import <- lapply(rlist, raster)
+snow.multitemp <- stack(import)  
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+plot(snow.multitemp, col=cl)
+
+prediction <- raster("predicted.2025.norm.tif")
+plot(prediction, col=cl)
+# writeraster creates a data, it is the opposite to raster function
+# with raster or brik function you import the data, with writeraster function you are exportinx images from R to my folder
+writeRaster(prediction, "final.tif")
+final.stack <- stack(snow.multitemp, prediction)
+final.stack <- stack(snow.multitemp, prediction)
+plot(final.stack, col=cl)
+
+# export R graph for yout beautiful thesis
+png("my_final_exciting_graph.png")
+plot(final.stack, col=cl)
+dev.off()
+
+######## 13. R_code_no2 #########
+#################################
+
+library(raster)
+setwd("C:/lab/no2/") # windows
+
+# Exercise: import all of the NO2 data in R by the lapply function
+rlist <- list.files(pattern="EN")
+rlist
+
+import <- lapply(rlist, raster)
+EN <- stack(import)
+cl <- colorRampPalette(c('red','orange','yellow'))(100) # 
+plot(EN, col=cl)
+
+# let's plot the first one and the last one only to see the difference, january and march
+par(mfrow=c(1,2))
+plot(EN$EN_0001, col=cl)
+plot(EN$EN_0013, col=cl)
+
+# RGB space
+plotRGB(EN, r=1, g=7, b=13, stretch="lin")
+
+# difference map
+dif <- EN$EN_0013 - EN$EN_0001
+cld <- colorRampPalette(c('blue','white','red'))(100) # 
+plot(dif, col=cld)
+
+# quantitative estimate!
+# let's see the boxplot() function
+# produce box and whisker (the lines) of a given data
+# let's make a boxplot of the whole stack, to see the variation in a graphical way 
+boxplot(EN)
+
+# there are a lot of outliers, let's remove them 
+boxplot(EN, outline=F)
+
+# let's move the boxplots horizontal 
+boxplot(EN, outline=F, horizontal=T)
+
+# let's add the axes to make it easier to read
+boxplot(EN, outline=F, horizontal=T, axes=T)
+
+# plot!
+plot(EN$EN_0001, EN$EN_0013)
+abline(0,1,col="red")
+
+######## 1:1 line with snow data
+setwd("C:/lab/snow/") 
+
+# Exercise: import the snow cover imeages altogether
+
+# fast version of import and plot of many data for lazy people!
+rlist <- list.files(pattern="snow20")
+rlist
+
+import <- lapply(rlist, raster)
+snow.multitemp <- stack(import)
+
+plot(snow.multitemp$snow2000r, snow.multitemp$snow2020r)
+abline(0,1,col="red")
+
+############# 14. R_crop_an_image ###############
+#################################################
+
+#how to crop satellite images 
+
+setwd("C:/lab/")
+library(raster)
+library(ncdf4) 
+
+snow <- raster("c_gls_SCE500_202005180000_CEURO_MODIS_V1.0.1.nc")
+
+cl <- colorRampPalette(c('darkblue','blue','light blue'))(100) 
+plot(snow, col=cl)
+
+ext <- c(0, 20, 35, 50)
+zoom(snow, ext=ext) # zoom function allows to zoom on an image
+
+# crop function allows to create a new image
+snowitaly <- crop(snow, ext) 
+plot(snowitaly, col=cl) 
+
+#you can also use drawextent
+# zoom(snow, ext=drawExtent())
+# crop(snow, drawExtent())
+
+############ 15. R_code_interpolation ###########
+#################################################
+
+###interpolation
+# using data that we measured in the field 
+# 1.Foreste Casentinesi dataset
+
+setwd("C:/lab/snow/") 
+install.packages("spatstat")
+## Interpolation: spatstat library
+library(spatstat)
+
+inp <- read.table("dati_plot55_LAST3.csv", sep=";", head=T) #; is for the semi-column, each column has an header so is TRUE
+# attach-->start working with the dataset
+attach(inp)
+plot(X,Y)
+
+#to know minimum and maximum of X and Y
+summary(inp)
+#ppp() function we are going to assign what are X, Y and the range
+inppp <- ppp(x=X,y=Y,c(716000,718000),c(4859000,4861000))
+
+#marks() function to lable the single point with the data we want
+#we put into the inppp the canopy cover
+names(inp)
+marks(inppp) <- Canopy.cov
+# we don't need to use $ to select the column because we attached the file
+# Smooth() function is from library(spatstat). Allows us to interpolate data where we don't have it.
+canopy <- Smooth(inppp)
+plot(canopy)
+points(inppp, col="green") # to add the points to the image 
+
+# we can measure the lichens on the tree and see how much they are covering them
+# lichens: bioindicators
+marks(inppp) <- cop.lich.mean
+lichs <- Smooth(inppp)
+plot(lichs)
+points(inppp)
+
+# show our plots in one image
+par(mfrow=c(1,3))
+plot(canopy)
+points(inppp)
+plot(lichs)
+points(inppp)
+
+# final plot
+plot(Canopy.cov, cop.lich.mean, col="red", pch=19, cex=2)
+########################################################
+
+# 2. Data psammophilus species 
+#psammophilus: adapted to arid environments (sand dunes)
+# The file that is just a table (no need to use raster or brick)
+inp.psam <- read.table("dati_psammofile.csv", sep=";", head=T)
+
+attach(inp.psam)
+# have a look to the dataset
+head(inp.psam)
+summary(inp.psam) # C.org is the amount of carbon. the higher it is the higher the amount of organisms
+
+# let's see the point in space through the function 
+plot(E,N)
+inp.psam.ppp <- ppp(x=E,y=N,c(356450,372240),c(5059800,5064150))
+
+marks(inp.psam.ppp) <- C_org
+# Smooth() function to calculate the means between points
+C <- Smooth(inp.psam.ppp)
+plot(C)
+points(inp.psam.ppp)
+
+######## 16. R_species_distribution_modelling ########
+######################################################
+# Species Distribution Modelling
+# how to model species distribution
+
+install.packages("sdm")
+library(sdm)
+library(raster) # predictors
+library(rgdal) # species 
+
+# species, presence/absence 
+file <- system.file("external/species.shp", package="sdm")
+species <- shapefile(file)
+species
+species$Occurrence # table with absence/presence of species, 0 or 1 
+plot(species)
+
+plot(species[species$Occurrence == 1,],col='blue',pch=16) # to only plot the presences 
+points(species[species$Occurrence == 0,],col='red',pch=16)  # to plot the absences 
+
+# environmental variables
+path <- system.file("external", package="sdm")
+
+#ASII files-->asc, is like a tif o jpeg, is an extention
+lst <- list.files(path=path,pattern='asc$',full.names = T)
+
+# we have as files elevation, precipitation, temperature and vegetation
+# so we use stack function in order to stack all the files toghether
+preds <- stack(lst)
+plot(preds)
+cl <- colorRampPalette(c('blue','orange','red','yellow')) (100)
+
+plot(preds, col=cl)
+plot(preds$elevation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+plot(preds$temperature, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+plot(preds$precipitation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+plot(preds$vegetation, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# we create a model -> to put all the information together 
+
+d <- sdmData(train=species, predictors=preds) # sdmData creates objects that holds species (single or multiple) and explanatory variates and more info 
+
+# generalized linear model --> glm, several predictors all together 
+m1 <- sdm(Occurrence ~ elevation + precipitation + temperature + vegetation, data=d, methods = "glm")
+p1 <- predict(m1, newdata=preds)
+plot(p1, col=cl)
+points(species[species$Occurrence == 1,], pch=16)
+
+# we can make the final stack with all the predictors and variables
+s1 <- stack(preds,p1)
+plot(s1, col=cl)
