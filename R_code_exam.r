@@ -17,6 +17,7 @@
 # 14. R_crop_an_image 
 # 15. R_code_temp_interpolation
 # 16. R_species_distribution_modelling
+# 17. R_exam_project
 
 ####### 1. R_code_first #######
 ###############################
@@ -1117,3 +1118,23 @@ points(species[species$Occurrence == 1,], pch=16)
 # we can make the final stack with all the predictors and variables
 s1 <- stack(preds,p1)
 plot(s1, col=cl)
+
+
+############## R_exam_project ##################
+###############################################
+### Key words
+# Green roof
+# nature based solutions
+# heat island effect
+
+# What to do
+# Check differences before and after the constructions (https://glovis.usgs.gov/)
+# Landsat--> band Temperature infrared
+# RGB, put temp infrared band
+# NDVI of vegetation 
+
+# projects to take in account
+
+
+
+
