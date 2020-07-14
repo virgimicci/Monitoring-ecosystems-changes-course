@@ -37,6 +37,7 @@ head(meuse)
 
 #Let's plot two variables
 #let's see if zinc concentration is related to that copper
+
 #the function attach () connects the dataset to the r search path so that we can use the infos in the dataset
 attach(meuse)
 # plot function is used for plotting a dataset
@@ -48,15 +49,16 @@ plot(zinc,copper,col="green",pch=19)
 # cex is used to define the size of the symbol
 plot(zinc,copper,col="green",pch=19,cex=4)
 
-#### 2. R_code_multipanel ### 
+######### 2. R_code_multipanel ############
+###########################################
 ### Multipanel in R: second lecture of monitoring ecosystem
 
 install.packages("sp")
-install.packages("GGally") # this is used for the function ggpairs()
+install.packages("GGally") # this is used for the function ggpairs(), is an extension of ggplot2
 
 library(sp) # require(sp) will also do the job
 
-data(meuse) #there is a dataset aviable named meuse
+data(meuse) # there is a dataset aviable named meuse
 attach(meuse)
 
 # Excercise: see the names of the variables and plot cadmium versus zinc 
@@ -103,7 +105,7 @@ coordinates(meuse) = ~x+y # the function coordinates() is to say to R that in th
 
 # we can put a plot for making a graph of the dataset
 plot(meuse)
-spplot(meuse, "zinc") # the legend is related to the variable, in this case Zinc
+spplot(meuse, "zinc") # plot several layers with a single legend for all the maps. The legend is related to the variable, in this case Zinc
 
 # Exercise: plot the spatial amount of copper 
 spplot(meuse, "copper", main = "Copper concentration")  # with "main" i create the title of the graph
@@ -158,6 +160,8 @@ library(ggplot) #require(ggplot2)
 data(mpg) #to access to it
 head(mpg)
 # key components: data, aes, geometry
+# aes= variable we want to plot, size=dimensions of point, geom = geometry of the point
+
 ggplot(mpg, aes(x=displ, y=hwy)) + geom_point()
 
 # we can change the geometry of the graph 
@@ -166,12 +170,13 @@ ggplot(mpg, aes(x=displ, y=hwy)) + geom_polygon()
 
 #let's look at the covid data that we already have uploaded
 head(covid)
-# aes= variable we want to plot, size=dimensions of point, geom = geometry of the point
 # we will exagerate the size by the number of cases
 ggplot(covid, aes(x=lon, y=lat, size=cases)) + geom_point()
 
 
-####### 4. R_code_multivariate #######
+########## 4. R_code_multivariate ##########
+############################################
+
 # R code for multivariate analysis
 setwd("C:/lab/")
 
@@ -199,15 +204,17 @@ multivar
 biomes_types <- read.table("biomes_types.csv", header=T, sep=",")
 head(byomes_types)
 attach(biomes_types)
-# we make an ordiellipse that connects all the data. Multivar is the first name we gave
+# we make an ordiellipse that connects all the plots of the same biome
+# Multivar is the first name we gave
 # lwd= thickness of the line with respect to the default thickness 
+# kind: type of grouping 
 ordiellipse(multivar, type, col=1:4, kind = "ehull", lwd=3) # we can put the color like this or col=c("green","orange","red","blue")
 #to see the 'disk' of the biomes
 ordispider(multivar, type, col=1:4, label=T)
 
 
-####### 5. R_code_remote_sensing #######
-########################################
+########### 5. R_code_remote_sensing ###########
+################################################
 
 # R code remote sensing, to see things through wave
 
@@ -229,7 +236,7 @@ cl <- colorRampPalette(c("black","grey","light grey"))(100)
 # Exercise: plot the image with the new color ramp palette
 plot(p224r63_2011, col=cl) # using col=cl we use the colors decided in the previous funcion
 
-# Bands of Landsat
+# Bands of Landsat 
 # B1: blue
 # B2: green
 # B3: red
@@ -241,8 +248,7 @@ par(mfrow=c(2,2))
 
 # B1: blue
 clb <- colorRampPalette(c('dark blue', 'blue', 'light blue'))(100)
-# $ to link every single band to the image
-plot(p224r63_2011$B1_sre, col=clb)
+plot(p224r63_2011$B1_sre, col=clb) # $ to link every single band to the image
 
 # B2: green
 # Excercise do the same for the green band B2_sre
@@ -314,10 +320,11 @@ plotRGB(p224r63_2011, r=4, g=3, b=2, stretch="hist")
 #bands of Landsat
 #B1: blue
 #B2: green
-#B3: red
-#B4: NIR
+#B3: red B3_sre
+#B4: NIR B4_sre
 
 # we are going to use the vegetation index
+# dvi 2011
 dvi2011 <- p224r63_2011$B4_sre - p224r63_2011$B3_sre
 cl <- colorRampPalette(c('darkorchid3','light blue','lightpink4'))(100) 
 plot(dvi2011,col=cl)
@@ -352,12 +359,12 @@ library(spatstat)
 
 attach(covid)
 head(covid)
-# let's give a name to what we are about to make -> covids. ppp is planar point pattern 
+# let's give a name to what we are about to make -> covids 
 # then explain x and y variables and the range for the numbers with c
-covids <- ppp(lon, lat, c(-180,180), c(-90,90)) # ?ppp creates an object of class "ppp" representing a point pattern dataset in the two-dimensional plane
+covids <- ppp(lon, lat, c(-180,180), c(-90,90)) # ?ppp (planar point pattern) creates an object of class "ppp" representing a point pattern dataset in the two-dimensional plane
 # density of the covids object that we created before
 d <- density(covids)
-# to show the map i use plot
+# to show the map I use plot
 plot(d)
 # let's put the points inside this plot
 points(covids)
@@ -426,7 +433,7 @@ plot(copNDVI)
 # reclassify is a function that (re)classifies groups of values to other values
 # "cbind" is to remove some data from the library that is not useful for us
 copNDVI<- reclassify(copNDVI, cbind(253:255,NA), right=TRUE)
-levelplot(copNDVI)
+levelplot(copNDVI) # draw level plots and contour plots
 # highlights the mean biomass over the last 20 years
 
 # fact=10 (factor of 10) is aggregating 10 pixels in 1, so the new image has much visible boundaries beetween colours
@@ -442,11 +449,12 @@ levelplot(copNDVI100)
 setwd("C:/lab/")
 library(raster)
 
+# DVI deforestation
 defor1 <- brick("defor1_.jpg.png") # imports different layers at a time 
 defor2 <- brick("defor2_.jpg.png")
 
-# band1: NIR
-# band2: red
+# band1: NIR, defor1_.1, defor2_.1
+# band2: red defor1_.2, defor2_.2
 # band3: green 
 # making the plot of the two images separately, selecting the bands, stretch to make a better passage between colours
 plotRGB(defor1, r=1, g=2,b=3, stretch="Lin")
@@ -470,7 +478,7 @@ dvi1 <- defor1$defor1_.1 - defor1$defor1_.2
  
 dvi2 <- defor2$defor2_.1 - defor2$defor2_.2
 
-cl <- colorRampPalette(c('darkblue','yellow','red','black'))(100) #we create the palette with the colours that we think more useful to highlight our data
+cl <- colorRampPalette(c('darkblue','yellow','red','black'))(100) # we create the palette with the colours that we think more useful to highlight our data
 par(mfrow=c(1,2))
 plot(dvi1, col=cl)
 plot(dvi2, col=cl)
@@ -526,8 +534,9 @@ plotRGB(p224r63_2011, r=5, g=4, b=3, stretch="Lin")
 # we are going to see if band3 is correlated to band1, so if having small values of B1 is related to the values on B3 
 # first we need to know the names of those bands 
 names(p224r63_2011)
-#"B1_sre" "B2_sre" "B3_sre" "B4_sre" "B5_sre" "B6_bt"  "B7_sre"
-#we are going, through $, to correlate the bands to the image
+# "B1_sre" "B2_sre" "B3_sre" "B4_sre" "B5_sre" "B6_bt"  "B7_sre"
+# sre: spectrum reflectance, bt: bit transfer
+# we are going, through $, to correlate the bands to the image
 plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
 
 dev.off()
@@ -536,26 +545,31 @@ plot(p224r63_2011$B1_sre, p224r63_2011$B3_sre)
 # PCA
 # decrease resolution
 p224r63_2011_res <- aggregate(p224r63_2011, fact=10)
+
 # rasterPCA function calculates R-mode PCA (Principal Component Analysis) for RasterBricks or RasterStacks and returns a RasterBrick with multiple layers of PCA scores
 # PCA is useful to uncover relationships among many variables (as found in a set of raster maps in a map list) and to reduce the amount of data needed to define the relationships
 p224r63_2011_pca <- rasterPCA(p224r63_2011_res)
 
-plot(p224r63_2011_pca$map)
+plot(p224r63_2011_pca$map) #let's polot the $map
 cl <- colorRampPalette(c('dark grey','grey','light grey'))(100) 
 plot(p224r63_2011_pca$map, col=cl)
-summary(p224r63_2011_pca$model)
-pairs(p224r63_1988)
+
+# summary:to see information clearly
+summary(p224r63_2011_pca$model) # $model : how much variation is explained by each component
+# PC1 99.83% of the whole variation
+
+pairs(p224r63_1988) # how much the bands are correlated each other
 
 # let's do the same for the 1988 
 p224r63_1988_res <- aggregate(p224r63_1988, fact=10)
 p224r63_1988_pca <- rasterPCA(p224r63_1988_res)
 plot(p224r63_1988_pca$map, col=cl)
+
 summary(p224r63_1988_pca$model) # we see that there is high correlation 
 # here as well we can see that the PC1 has the highest amount of information
-summary(p224r63_1988_pca$model) # we see that there is high correlation 
 pairs(p224r63_1988)
 
-# now we can make a difference between the 1988 and 2011 and then plotting the difference. 
+# now we can make a difference between the 1988 and 2011 and then plotting the difference 
 # we are making the difference of every pixel
 difpca <- p224r63_2011_pca$map - p224r63_1988_pca$map
 plot(difpca)
@@ -606,7 +620,7 @@ load("faPAR.RData")
 library(raster)
 library(rasterdiv)
 library(rasterVis)
-writeRaster(copNDVI, "copNDVI.tif")
+writeRaster(copNDVI, "copNDVI.tif") # write an entire Raster object to a file
 # 5.3 MB
 
 # faPAR: level plot this set
@@ -619,10 +633,10 @@ levelplot(faPAR10)
 # b= the slope, a= the point of intersection with y (intercept)
 
 erosion <- c(12, 14, 16, 24, 26, 40, 55, 67)
-hm <- c(30, 100, 150, 200, 260, 340, 460, 600)
+hm <- c(30, 100, 150, 200, 260, 340, 460, 600) # hm, heavy metals
 plot(erosion, hm, col="red", pch=19, xlab="erosion", ylab="heavy metals")
 
- # the function used is lm
+# the function used is lm
 model1 <- lm(hm ~ erosion)
 summary(model1) # to have all the information about the model
 # in this case the equation is hm= 9.2751*erosion + (-26.9888)
@@ -650,10 +664,10 @@ pts <- spsample(pol[1,], n, type = 'random')
 }
 
 pts <-random.points(faPAR10,1000) 
-copNDVIp <- extract(copNDVI, pts)
+copNDVIp <- extract(copNDVI, pts) # make the extraction of the faPAR and copNDVI from a raster
 faPAR10p <- extract(faPAR10,pts)
 
-# photosyinthesis vs biomass
+# photosyinthesis (y) vs biomass (X)
 model2 <- lm(faPAR10p ~ copNDVIp)
 summary(model2) # we see through the r squared and the p-value that the correlation is not random
 plot(copNDVIp, faPAR10p, col="green", xlab="biomass", ylab="photosynthesis")
@@ -665,11 +679,12 @@ abline(model2, col="red")
 ###################################
 # R_code_radiance.r
 
+# bit example
 library(raster)
 
 #let's create a raster with 2 rows and 2 columns
 toy <- raster(ncol=2, nrow=2, xmn=1, xmx=2, ymn=1, ymx=2)
-values(toy) <- c(1.13,1.44,1.55,3.4)
+values(toy) <- c(1.13,1.44,1.55,3.4) # put data into each pixel
 plot(toy)
 text(toy, digits=2)
 
@@ -714,6 +729,7 @@ plot(copNDVI)
 ########################################
 
 # R_code_EBVs.r
+# Essential Biodiversity Variables
 
 # install.packages("raster")
 # install.packages("RStoolbox")
@@ -724,6 +740,7 @@ setwd("C:/lab/") # windows
 
 # now we import the image: we can use raster which imports one single layer or brick which imports the whole image (different layers at a time)
 snt <- brick("snt_r10.tif")
+# 30 Bit image 
 
 plot(snt)
 
