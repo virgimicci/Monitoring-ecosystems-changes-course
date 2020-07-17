@@ -1120,20 +1120,6 @@ s1 <- stack(preds,p1)
 plot(s1, col=cl)
 
 
-############## R_exam_project ##################
-###############################################
-### Key words
-# Green roof
-# nature based solutions
-# heat island effect
-
-# What to do
-# Check differences before and after the constructions (https://glovis.usgs.gov/)
-# Landsat--> band Temperature infrared
-# RGB, put temp infrared band
-# NDVI of vegetation 
-
-# projects to take in account
 
 
 
