@@ -17,7 +17,7 @@
 # 14. R_crop_an_image (968)
 # 15. R_code_temp_interpolation (993)
 # 16. R_species_distribution_modelling (1063)
-
+# 17. R_project_LaPalma
 
 ####### 1. R_code_first #######
 ###############################
@@ -1119,6 +1119,198 @@ points(species[species$Occurrence == 1,], pch=16)
 s1 <- stack(preds,p1)
 plot(s1, col=cl)
 
+########## 17. R_project_LaPalma ###########
+#############################################
+
+setwd("C:/lab/exam") # windows
+
+library(raster)
+library(RStoolbox)
+
+# La Palma in September 2016 post fire
+# fast way to import all the bands
+rlist09 <- list.files(pattern="LC08_L1TP_208040_20160928_20170321_01_T1_B")
+import09 <- lapply(rlist09,raster)
+lapalma09 <- stack(import09)
+lapalma09 # i check the order of the bands to change their names correctly
+names(lapalma09) <- c("lapalma09_B10","lapalma09_B2","lapalma09_B3","lapalma09_B4","lapalma09_B5","lapalma09_B6") # I change the names of the bands for a easly reading
+lapalma09 
+
+#1- lapalma09_B10 : TIRS (Thermal Indrared)
+#2- lapalma09_B2 : BLUE
+#3- lapalma09_B3 : GREEN
+#4- lapalma09_B4 : RED
+#5- lapalma09_B5 : NIR
+#6- lapalma07_B6 : SWIR
+
+
+#La Palma in August 2016 (during fire)
+rlist08 <- list.files(pattern="LC08_L1TP_208040_20160811_20170322_01_T1_B")
+import08 <- lapply(rlist08,raster)
+lapalma08 <- stack(import08)
+lapalma08 # to check the names of the band and change their names
+names(lapalma08) <- c("lapalma08_B10","lapalma08_B2","lapalma08_B3","lapalma08_B4","lapalma08_B5","lapalma08_B6") # I change the names of the bands for a easly reading
+lapalma08 
+
+#1- lapalma08_B10 : TIRS (Thermal Indrared)
+#2- lapalma08_B2 : BLUE
+#3- lapalma08_B3 : GREEN
+#4- lapalma08_B4 : RED
+#5- lapalma08_B5 : NIR
+#6- lapalma08_B6 : SWIR
+
+
+#La Palma in July 2016 pre fire
+rlist07<- list.files(pattern="LC08_L1TP_208040_20160710_20170323_01_T1_B")
+import07 <- lapply(rlist07,raster)
+lapalma07 <- stack(import07)
+lapalma07
+names(lapalma07) <- c("lapalma07_B10","lapalma07_B2","lapalma07_B3","lapalma07_B4","lapalma07_B5","lapalma07_B6") # I change the names of the bands for a easly reading
+lapalma07
+
+#1- lapalma07_B10 : TIRS (Thermal Indrared)
+#2- lapalma07_B2 : BLUE
+#3- lapalma07_B3 : GREEN
+#4- lapalma07_B4 : RED
+#5- lapalma07_B5 : NIR
+#6- lapalma07_B6 : SWIR
+
+
+# I don't like how I see the island
+# I just want the island itself and not the external parts
+# I create a shapefile with QGIS
+
+shapefile("lapalma.shp") # shapefile created with QGIS
+shp <- shapefile("lapalma.shp")
+plot(shp)
+shp # the extent is different from the RasterStack
+# I have to change the extent of the shp in order to have the crop
+# I use spTransform using the csr of lapalma09
+shp <- spTransform(shp, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs"))
+
+# Crop/mask lapalma09
+lapalma09 <- mask(lapalma09, shp) 
+lapalma09 <- crop(lapalma09, shp)
+plot(lapalma09)
+
+#Crop/mask lapalma08
+lapalma08 <- mask(lapalma08, shp) # mask is not sufficient
+lapalma08 <- crop(lapalma08, shp) # i use crop function
+plot(lapalma08)
+
+# Crop/mask lapalma07
+lapalma07 <- mask(lapalma07, shp) # mask is not sufficient
+lapalma07 <- crop(lapalma07, shp) # i use crop function
+plot(lapalma07)
+
+##### plotRGB
+# how human eyes see it
+par(mfrow=c(1,3), mar=rep(1,4))
+plotRGB(lapalma07,4,3,2, stretch="lin", main="July", margins=T) # non fa il titolo CONTROLLA
+plotRGB(lapalma08,4,3,2, stretch="lin", main="August", margins=T)
+plotRGB(lapalma09,4,3,2, stretch="lin", main="September", margins=T)
+
+
+### NDVI analysis ####
+# ndvi <- (NIR - red) / (NIR + red)
+#1 lapalma07_B10 : TIRS (Thermal Indrared)
+#2 lapalma07_B2 : BLUE
+#3 lapalma07_B3 : GREEN
+#4 lapalma07_B4 : RED
+#5 lapalma07_B5 : NIR
+#6 lapalma07_B6 : SWIR
+
+cl <- colorRampPalette(c('blue','white','red'))(100) 
+
+# Using spectralIndices() from RStoolbox for the NDVI analysis
+
+NDVI07<-spectralIndices(lapalma07, red="lapalma07_B4", nir="lapalma07_B5", indices="NDVI")
+NDVI09<-spectralIndices(lapalma09, red="lapalma09_B4", nir="lapalma09_B5", indices="NDVI")
+par(mfrow=c(1,2))
+plot(NDVI07, col=cl, main= "July")
+plot(NDVI09, col=cl, main= "September")
+
+# Zoom in the burned area
+ext <- c(215000, 227000, 3150000, 3170000)
+zoom(NDVI07, ext=ext)
+zoomNDVI07<- crop(NDVI07, ext)
+
+ext <- c(215000, 227000, 3150000, 3170000)
+zoom(NDVI09, ext=ext)
+zoomNDVI09<- crop(NDVI09, ext)
+
+par(mfrow=c(1,2))
+plot(zoomNDVI07, col=cl, main= "July")
+plot(zoomNDVI09, col=cl, main= "September")
+
+
+#highlighting hot soil temperature in red (TIRS,r,b)
+par(mfrow=c(1,2), mar=rep(4,4))
+plotRGB(lapalma07,1,4,2, stretch="lin", main="High Temperature highlighting in July", margins= T, cex.main= 1)
+rect(216000,3151000,226000,3172000, border = "red")
+plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in August", margins=T, cex.main=1)
+rect(216000,3151000,226000,3172000, border = "red")
+
+##focus in the area
+plotRGB(lapalma07,1,4,2, stretch="lin",  main="High Temperature highlighting in July", margins= T, cex.main= 1, ext=ext)
+plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in August", margins=T, cex.main=1, ext=ext)
+
+#highlight the burnt area (SWIR-NIR-red)
+par(mfrow=c(1,1), mar=rep(4,4))
+burntarea08<-plotRGB(lapalma08,6,5,4, stretch="lin", margins=T, main="Burnt Area")
+rect(216000,3151000,226000,3172000, border = "red")
+
+# see relation among temperature and burned area
+par(mfrow=c(1,2), mar=rep(4,4))
+plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting", margins=T)
+rect(216000,3151000,226000,3172000, border = "red")
+plotRGB(lapalma08,6,5,4, stretch="lin", main= "Burnt Area highlighting", margins=T)
+rect(216000,3151000,226000,3172000, border = "red")
+
+#zoom in the burnt area
+plotRGB(lapalma08,1,4,2, stretch="lin", ext=ext, margins=T,  main="High Temperature highlighting")
+plotRGB(lapalma08,6,5,4, stretch="lin", ext=ext, main= "Burnt Area highlighting", margins=T)
+
+plotRGB(lapalma2015,7,2,3,stretch="lin")
+
+### La palma in august 2015, no fire occurred  ##
+lp2015<-brick("LC82080402015237LGN01_Enmask2.tif") #Raster without cloud created with Fmask in QGIS
+lp2015
+
+# B2 BLUE :LC8208040//_Enmask2.1
+# B3 GREEN : LC8208040//_Enmask2.2
+# B4 RED : LC8208040//_Enmask2.3
+# B5 NIR : LC8208040//_Enmask2.4
+# B6 SWIR : LC8208040//_Enmask2.5
+# B7 SWIR2 :LC8208040//_Enmask2.6
+# B10 TIRS : LC8208040//_Enmask2.7 
+
+names(lp2015)<- c("B2 BLUE ", "B3 GREEN"," B4 RED", "B5 NIR ", "B6 SWIR ","B7 SWIR2", "B10 TIRS")
+
+# Crop/mask La palma 2015
+lapalma2015 <- mask(lp2015, shp) # mask is not sufficient
+lapalma2015 <- crop(lapalma2015, shp) # i use crop function
+plot(lapalma2015)
+
+# DIfferences in T between August 2016 and 2015
+par(mfrow=c(1,2), mar=rep(4,4))
+plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in Aug2016", margins= T, cex.main= 1)
+rect(216000,3151000,226000,3172000, border = "red")
+plotRGB(lapalma2015,7,3,1, stretch="lin", main="High Temperature highlighting in Aug2015", margins=T, cex.main=1)
+rect(216000,3151000,226000,3172000, border = "red")
+
+
+# Comparison of areas in 2015 and 2016
+plotRGB(lapalma08,6,5,4, stretch="lin", margins=T,  main="Fire occurred in August 2016")
+rect(216000,3151000,226000,3172000, border = "red")
+plotRGB(lapalma2015,5,4, 3, stretch="lin",  main= "Fire doesn't occurred in 2015", margins=T) # we have lighter color, maybe for the black hole given by cloud delate
+rect(216000,3151000,226000,3172000, border = "red")
+
+#zoom
+par(mfrow=c(1,3), mar=rep(4,4))
+plotRGB(lapalma08,1,4,2, stretch="lin", ext=ext, main="High Temperature highlighting in Aug2016", margins= T, cex.main= 1.5)
+plotRGB(lapalma07,1,4,2, stretch="lin", main="High Temperature highlighting in July2016", margins= T, cex.main= 1.5, ext=ext)
+plotRGB(lapalma2015,7,3,1, stretch="lin",  main="High Temperature highlighting in Aug2015", margins=T, cex.main=1.5, ext=c(215000, 227000, 3150000, 3170000))
 
 
 
