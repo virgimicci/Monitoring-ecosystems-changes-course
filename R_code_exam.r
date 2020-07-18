@@ -1,23 +1,23 @@
 # R_code_exam.r
 
 # Indices
-# 1. R_code_first 
-# 2. R_code_multipanel 
-# 3. R_code_spatial 
-# 4. R_code_multivariate 
-# 5. R_code_remote_sensing 
-# 6. R_code_point_pattern_analysis
-# 7. R_code_ecosystem_functioning
-# 8. R_code_PCA_remote_sensing 
-# 9. R_code_faPAR  
-# 10. R_code_radiance 
-# 11. R_code_EBVs 
-# 12. R_code_snow 
-# 13. R_code_no2
-# 14. R_crop_an_image 
-# 15. R_code_temp_interpolation
-# 16. R_species_distribution_modelling
-# 17. R_exam_project
+# 1. R_code_first (22)
+# 2. R_code_multipanel (53)
+# 3. R_code_spatial (94)
+# 4. R_code_multivariate (178)
+# 5. R_code_remote_sensing (217)
+# 6. R_code_point_pattern_analysis (353)
+# 7. R_code_ecosystem_functioning (413)
+# 8. R_code_PCA_remote_sensing (496)
+# 9. R_code_faPAR  (582)
+# 10. R_code_radiance (679)
+# 11. R_code_EBVs (729)
+# 12. R_code_snow (817)
+# 13. R_code_no2 (906)
+# 14. R_crop_an_image (968)
+# 15. R_code_temp_interpolation (993)
+# 16. R_species_distribution_modelling (1063)
+
 
 ####### 1. R_code_first #######
 ###############################
