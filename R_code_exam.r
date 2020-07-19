@@ -1231,6 +1231,10 @@ par(mfrow=c(1,2))
 plot(NDVI07, col=cl, main= "July")
 plot(NDVI09, col=cl, main= "September")
 
+# Plot the difference in NDVI
+diff<- NDVI07-NDVI09
+plot(diff, col=cl, main= "DIfference in NDVI between July and August")
+
 # Zoom in the burned area
 ext <- c(215000, 227000, 3150000, 3170000)
 zoom(NDVI07, ext=ext)
