@@ -17,7 +17,7 @@
 # 14. R_crop_an_image (968)
 # 15. R_code_temp_interpolation (993)
 # 16. R_species_distribution_modelling (1063)
-# 17. R_project_LaPalma
+# 17. R_project_LaPalma (1122)
 
 ####### 1. R_code_first #######
 ###############################
@@ -1296,25 +1296,26 @@ par(mfrow=c(1,2), mar=rep(3,4))
 plotRGB(lapalma2015, 3,2,2, stretch="lin", margins=T, main= "Stretch = lin") # too light colors
 plotRGB(lapalma2015, 3,2,1, stretch="hist", margins=T, main= "Stretch = hist")
 
-# DIfferences in T between August 2016 and 2015
+# Differences in T between August 2016 and 2015
 par(mfrow=c(1,2), mar=rep(4,4))
 plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in Aug2016", margins= T, cex.main= 1)
 rect(216000,3151000,226000,3172000, border = "red")
-plotRGB(lapalma2015,7,3,1, stretch="lin", main="High Temperature highlighting in Aug2015", margins=T, cex.main=1)
-rect(216000,3151000,226000,3172000, border = "red")
-
-
-# Comparison of areas in 2015 and 2016
-plotRGB(lapalma08,6,5,4, stretch="lin", margins=T,  main="Fire occurred in August 2016")
-rect(216000,3151000,226000,3172000, border = "red")
-plotRGB(lapalma2015,5,4, 3, stretch="lin",  main= "Fire doesn't occurred in 2015", margins=T) # we have lighter color, maybe for the black hole given by cloud delate
+plotRGB(lapalma2015,7,3,1, stretch="hist", main="High Temperature highlighting in Aug2015", margins=T, cex.main=1)
 rect(216000,3151000,226000,3172000, border = "red")
 
 #zoom
 par(mfrow=c(1,3), mar=rep(4,4))
 plotRGB(lapalma08,1,4,2, stretch="lin", ext=ext, main="High Temperature highlighting in Aug2016", margins= T, cex.main= 1.5)
 plotRGB(lapalma07,1,4,2, stretch="lin", main="High Temperature highlighting in July2016", margins= T, cex.main= 1.5, ext=ext)
-plotRGB(lapalma2015,7,3,1, stretch="lin",  main="High Temperature highlighting in Aug2015", margins=T, cex.main=1.5, ext=c(215000, 227000, 3150000, 3170000))
+plotRGB(lapalma2015,7,3,1, stretch="hist",  main="High Temperature highlighting in Aug2015", margins=T, cex.main=1.5, ext=c(215000, 227000, 3150000, 3170000))
+
+
+# Comparison of areas in 2015 and 2016
+par(mfrow=c(1,2), mar=rep(4,4))
+plotRGB(lapalma08,6,5,4, stretch="lin", margins=T,  main="August 2016")
+rect(216000,3151000,226000,3172000, border = "red")
+plotRGB(lapalma2015,5,4, 3, stretch="hist",  main= "August 2015", margins=T)
+rect(216000,3151000,226000,3172000, border = "red")
 
 
 
