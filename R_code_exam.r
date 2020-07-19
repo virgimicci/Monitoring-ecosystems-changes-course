@@ -1134,7 +1134,8 @@ import09 <- lapply(rlist09,raster)
 lapalma09 <- stack(import09)
 lapalma09 # i check the order of the bands to change their names correctly
 names(lapalma09) <- c("lapalma09_B10","lapalma09_B2","lapalma09_B3","lapalma09_B4","lapalma09_B5","lapalma09_B6") # I change the names of the bands for a easly reading
-lapalma09 
+lapalma09
+plot(lapalma09)
 
 #1- lapalma09_B10 : TIRS (Thermal Indrared)
 #2- lapalma09_B2 : BLUE
@@ -1206,7 +1207,7 @@ plot(lapalma07)
 ##### plotRGB
 # how human eyes see it
 par(mfrow=c(1,3), mar=rep(1,4))
-plotRGB(lapalma07,4,3,2, stretch="lin", main="July", margins=T) # non fa il titolo CONTROLLA
+plotRGB(lapalma07,4,3,2, stretch="lin", main="July", margins=T) 
 plotRGB(lapalma08,4,3,2, stretch="lin", main="August", margins=T)
 plotRGB(lapalma09,4,3,2, stretch="lin", main="September", margins=T)
 
@@ -1235,7 +1236,6 @@ ext <- c(215000, 227000, 3150000, 3170000)
 zoom(NDVI07, ext=ext)
 zoomNDVI07<- crop(NDVI07, ext)
 
-ext <- c(215000, 227000, 3150000, 3170000)
 zoom(NDVI09, ext=ext)
 zoomNDVI09<- crop(NDVI09, ext)
 
@@ -1244,23 +1244,23 @@ plot(zoomNDVI07, col=cl, main= "July")
 plot(zoomNDVI09, col=cl, main= "September")
 
 
-#highlighting hot soil temperature in red (TIRS,r,b)
+# Highlighting hot soil temperature in red (TIRS,r,b)
 par(mfrow=c(1,2), mar=rep(4,4))
 plotRGB(lapalma07,1,4,2, stretch="lin", main="High Temperature highlighting in July", margins= T, cex.main= 1)
 rect(216000,3151000,226000,3172000, border = "red")
 plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in August", margins=T, cex.main=1)
 rect(216000,3151000,226000,3172000, border = "red")
 
-##focus in the area
+# Focus in the area
 plotRGB(lapalma07,1,4,2, stretch="lin",  main="High Temperature highlighting in July", margins= T, cex.main= 1, ext=ext)
 plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting in August", margins=T, cex.main=1, ext=ext)
 
-#highlight the burnt area (SWIR-NIR-red)
+# Highlight the burnt area (SWIR-NIR-red)
 par(mfrow=c(1,1), mar=rep(4,4))
 burntarea08<-plotRGB(lapalma08,6,5,4, stretch="lin", margins=T, main="Burnt Area")
 rect(216000,3151000,226000,3172000, border = "red")
 
-# see relation among temperature and burned area
+# See relation among temperature and burned area
 par(mfrow=c(1,2), mar=rep(4,4))
 plotRGB(lapalma08,1,4,2, stretch="lin", main="High Temperature highlighting", margins=T)
 rect(216000,3151000,226000,3172000, border = "red")
@@ -1271,7 +1271,6 @@ rect(216000,3151000,226000,3172000, border = "red")
 plotRGB(lapalma08,1,4,2, stretch="lin", ext=ext, margins=T,  main="High Temperature highlighting")
 plotRGB(lapalma08,6,5,4, stretch="lin", ext=ext, main= "Burnt Area highlighting", margins=T)
 
-plotRGB(lapalma2015,7,2,3,stretch="lin")
 
 ### La palma in august 2015, no fire occurred  ##
 lp2015<-brick("LC82080402015237LGN01_Enmask2.tif") #Raster without cloud created with Fmask in QGIS
@@ -1291,6 +1290,11 @@ names(lp2015)<- c("B2 BLUE ", "B3 GREEN"," B4 RED", "B5 NIR ", "B6 SWIR ","B7 SW
 lapalma2015 <- mask(lp2015, shp) # mask is not sufficient
 lapalma2015 <- crop(lapalma2015, shp) # i use crop function
 plot(lapalma2015)
+
+# Human eyes view with no clouds
+par(mfrow=c(1,2), mar=rep(3,4))
+plotRGB(lapalma2015, 3,2,2, stretch="lin", margins=T, main= "Stretch = lin") # too light colors
+plotRGB(lapalma2015, 3,2,1, stretch="hist", margins=T, main= "Stretch = hist")
 
 # DIfferences in T between August 2016 and 2015
 par(mfrow=c(1,2), mar=rep(4,4))
